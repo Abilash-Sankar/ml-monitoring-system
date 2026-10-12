@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader, RefreshCw } from 'lucide-react';
 import { checkHealth } from '../services/api';
@@ -15,7 +15,6 @@ const pageTitles = {
 export default function Topbar() {
   const location = useLocation();
   const [health, setHealth] = useState({ status: 'loading', model_loaded: false });
-  const intervalRef = useRef(null);
 
   const fetchHealth = useCallback(async () => {
     try {
@@ -27,10 +26,23 @@ export default function Topbar() {
   }, []);
 
   useEffect(() => {
-    fetchHealth();
-    intervalRef.current = setInterval(fetchHealth, 30000);
-    return () => clearInterval(intervalRef.current);
-  }, [fetchHealth]);
+    let active = true;
+    const updateHealth = async () => {
+      try {
+        const data = await checkHealth();
+        if (active) setHealth({ ...data, status: data.status || 'healthy' });
+      } catch {
+        if (active) setHealth({ status: 'unavailable', model_loaded: false });
+      }
+    };
+
+    updateHealth();
+    const intervalId = setInterval(updateHealth, 30000);
+    return () => {
+      active = false;
+      clearInterval(intervalId);
+    };
+  }, []);
 
   const title = pageTitles[location.pathname] || 'Dashboard';
 

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useState, useCallback } from 'react';
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   FlaskConical,
@@ -23,12 +23,6 @@ const navItems = [
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const location = useLocation();
-
-  // Close mobile menu on navigation
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
 
   const toggle = useCallback(() => setCollapsed(c => !c), []);
 
@@ -60,6 +54,7 @@ export default function Sidebar() {
               key={path}
               to={path}
               end={path === '/'}
+              onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 `sidebar__link ${isActive ? 'sidebar__link--active' : ''}`
               }

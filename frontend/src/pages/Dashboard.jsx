@@ -34,8 +34,22 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    fetchHealth();
-  }, [fetchHealth]);
+    let active = true;
+    checkHealth()
+      .then(data => {
+        if (active) setHealth(data);
+      })
+      .catch(err => {
+        if (active) setError(err.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Read prediction history from localStorage
   const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');

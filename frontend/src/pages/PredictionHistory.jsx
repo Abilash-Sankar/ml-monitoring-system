@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { History, Trash2, Eye, X, Inbox } from 'lucide-react';
+import { Trash2, Eye, X, Inbox } from 'lucide-react';
 import ProbabilityChart from '../components/ProbabilityChart';
 import './PredictionHistory.css';
 

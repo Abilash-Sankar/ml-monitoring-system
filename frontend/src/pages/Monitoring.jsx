@@ -36,10 +36,28 @@ export default function Monitoring() {
   }, []);
 
   useEffect(() => {
-    fetchHealth();
-    const id = setInterval(fetchHealth, 30000);
+    let active = true;
+    const updateHealth = async () => {
+      try {
+        const data = await checkHealth();
+        if (active) {
+          setHealth(data);
+          setError(null);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (active) {
+          setError(err.message);
+          setHealth(null);
+          setLoading(false);
+        }
+      }
+    };
+
+    updateHealth();
+    const id = setInterval(updateHealth, 30000);
     return () => clearInterval(id);
-  }, [fetchHealth]);
+  }, []);
 
   const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
   const predictionCount = history.length;
