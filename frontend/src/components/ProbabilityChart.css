@@ -1,0 +1,57 @@
+.probability-chart {
+  margin-top: 8px;
+}
+
+.probability-chart__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 0 0 14px;
+}
+
+.probability-chart__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.probability-chart__row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.probability-chart__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.probability-chart__species {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+  text-transform: capitalize;
+}
+
+.probability-chart__pct {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.probability-chart__track {
+  width: 100%;
+  height: 10px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.probability-chart__fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 2px;
+}

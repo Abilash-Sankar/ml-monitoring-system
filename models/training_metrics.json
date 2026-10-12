@@ -1,0 +1,98 @@
+{
+  "accuracy": 1.0,
+  "precision": {
+    "setosa": 1.0,
+    "versicolor": 1.0,
+    "virginica": 1.0
+  },
+  "recall": {
+    "setosa": 1.0,
+    "versicolor": 1.0,
+    "virginica": 1.0
+  },
+  "f1_score": {
+    "setosa": 1.0,
+    "versicolor": 1.0,
+    "virginica": 1.0
+  },
+  "support": {
+    "setosa": 10,
+    "versicolor": 9,
+    "virginica": 11
+  },
+  "confusion_matrix": [
+    [
+      10,
+      0,
+      0
+    ],
+    [
+      0,
+      9,
+      0
+    ],
+    [
+      0,
+      0,
+      11
+    ]
+  ],
+  "class_names": [
+    "setosa",
+    "versicolor",
+    "virginica"
+  ],
+  "feature_names": [
+    "sepal length (cm)",
+    "sepal width (cm)",
+    "petal length (cm)",
+    "petal width (cm)"
+  ],
+  "feature_importance": [
+    {
+      "name": "petal length (cm)",
+      "importance": 0.44
+    },
+    {
+      "name": "petal width (cm)",
+      "importance": 0.4215
+    },
+    {
+      "name": "sepal length (cm)",
+      "importance": 0.1081
+    },
+    {
+      "name": "sepal width (cm)",
+      "importance": 0.0304
+    }
+  ],
+  "training_samples": 120,
+  "test_samples": 30,
+  "n_estimators": 100,
+  "dataset_stats": {
+    "sepal length (cm)": {
+      "mean": 5.84,
+      "std": 0.83,
+      "min": 4.3,
+      "max": 7.9
+    },
+    "sepal width (cm)": {
+      "mean": 3.06,
+      "std": 0.43,
+      "min": 2.0,
+      "max": 4.4
+    },
+    "petal length (cm)": {
+      "mean": 3.76,
+      "std": 1.76,
+      "min": 1.0,
+      "max": 6.9
+    },
+    "petal width (cm)": {
+      "mean": 1.2,
+      "std": 0.76,
+      "min": 0.1,
+      "max": 2.5
+    }
+  }
+}

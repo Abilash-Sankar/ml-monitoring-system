@@ -1,0 +1,36 @@
+/* ===== App Layout ===== */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app__main {
+  flex: 1;
+  margin-left: 250px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* When sidebar is collapsed, the margin adjusts via the sidebar width.
+   We handle it by targeting the sidebar state. But since the sidebar is
+   a sibling, we use a CSS variable approach or just set a reasonable default.
+   The sidebar component handles its own width; the main area always uses 250px margin.
+   On collapse the sidebar shrinks, and we rely on the sidebar's fixed width. */
+
+.app__content {
+  flex: 1;
+  padding: 28px 32px;
+  background: #f8fafc;
+}
+
+@media (max-width: 768px) {
+  .app__main {
+    margin-left: 0;
+  }
+
+  .app__content {
+    padding: 20px 16px;
+  }
+}

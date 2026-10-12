@@ -1,0 +1,24 @@
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: #64748b;
+}
+
+.loading-state__spinner {
+  animation: spin 1s linear infinite;
+  color: #6366f1;
+}
+
+.loading-state__text {
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
