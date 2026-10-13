@@ -28,7 +28,7 @@ app.add_middleware(
         "http://localhost:5176",
         "https://ml-monitoring-system.vercel.app",
     ],
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Content-Type"],
 )
