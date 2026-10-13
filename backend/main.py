@@ -29,8 +29,8 @@ app.add_middleware(
         "https://ml-monitoring-system.vercel.app",
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE"],
-    allow_headers=["Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Locate saved models relative to this file
