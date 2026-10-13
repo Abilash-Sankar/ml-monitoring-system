@@ -22,6 +22,7 @@ app = FastAPI(title="Iris ML Prediction API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://localhost:3000",
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:5175",
