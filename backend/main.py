@@ -2,6 +2,7 @@ import json
 import time
 from pathlib import Path
 from datetime import datetime, timezone
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +19,7 @@ from database import (
 )
 
 app = FastAPI(title="Iris ML Prediction API")
+Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,
