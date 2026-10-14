@@ -1,6 +1,7 @@
 
 services:
   backend:
+    image: abilash007s/ml-monitoring-platform-backend:latest
     build:
       context: .
       dockerfile: Dockerfile.backend
