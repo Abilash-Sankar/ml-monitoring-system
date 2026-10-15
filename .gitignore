@@ -1,8 +1,11 @@
 .venv/
 **/__pycache__/
 *.py[cod]
+.pytest_cache/
+test-results.xml
 frontend/node_modules/
 frontend/dist/
 .env
 **/.env
 data/
+

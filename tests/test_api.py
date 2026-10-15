@@ -111,3 +111,21 @@ def test_model_metrics_are_available(client):
     assert 0 <= metrics["accuracy"] <= 1
     assert metrics["class_names"] == ["setosa", "versicolor", "virginica"]
     assert metrics["training_samples"] > 0
+
+
+def test_metrics_endpoint_and_custom_metrics(client):
+    # Perform a prediction
+    response = make_prediction(client)
+    assert response.status_code == 200
+
+    # Verify metrics endpoint returns Prometheus formatted metrics
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert "text/plain" in metrics_response.headers.get("content-type", "")
+    metrics_text = metrics_response.text
+
+    # Verify both standard instrumentator and custom ML metrics are present
+    assert "http_requests_total" in metrics_text
+    assert "prediction_requests_total" in metrics_text
+    assert "prediction_latency_seconds" in metrics_text
+    assert "species=\"setosa\"" in metrics_text

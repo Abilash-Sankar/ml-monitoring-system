@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 from datetime import datetime, timezone
 from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import REGISTRY, Counter, Histogram
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +18,43 @@ from database import (
     delete_prediction,
     clear_predictions,
 )
+
+# Custom Prometheus ML Metrics
+def _get_or_create_counter(name: str, documentation: str, labelnames=()):
+    if name in REGISTRY._names_to_collectors:
+        return REGISTRY._names_to_collectors[name]
+    return Counter(name, documentation, labelnames=labelnames)
+
+
+def _get_or_create_histogram(name: str, documentation: str, buckets=Histogram.DEFAULT_BUCKETS):
+    if name in REGISTRY._names_to_collectors:
+        return REGISTRY._names_to_collectors[name]
+    return Histogram(name, documentation, buckets=buckets)
+
+
+PREDICTION_REQUESTS_TOTAL = _get_or_create_counter(
+    "prediction_requests_total",
+    "Total number of prediction requests processed",
+    labelnames=("species", "status"),
+)
+
+PREDICTION_LATENCY_SECONDS = _get_or_create_histogram(
+    "prediction_latency_seconds",
+    "Time spent processing ML model prediction in seconds",
+    buckets=(0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0),
+)
+
+PREDICTION_ERRORS_TOTAL = _get_or_create_counter(
+    "prediction_errors_total",
+    "Total number of prediction errors encountered",
+    labelnames=("error_type",),
+)
+
+# Pre-populate metric series with 0 so Prometheus and Grafana immediately discover them
+for _species in ["setosa", "versicolor", "virginica"]:
+    PREDICTION_REQUESTS_TOTAL.labels(species=_species, status="success").inc(0)
+PREDICTION_ERRORS_TOTAL.labels(error_type="validation_error").inc(0)
+PREDICTION_ERRORS_TOTAL.labels(error_type="internal_error").inc(0)
 
 app = FastAPI(title="Iris ML Prediction API")
 Instrumentator().instrument(app).expose(app)
@@ -81,54 +119,64 @@ def health():
 def predict(flower: FlowerInput):
     start_time = time.perf_counter()
 
-    features = [
-        [
-            flower.sepal_length,
-            flower.sepal_width,
-            flower.petal_length,
-            flower.petal_width,
+    try:
+        features = [
+            [
+                flower.sepal_length,
+                flower.sepal_width,
+                flower.petal_length,
+                flower.petal_width,
+            ]
         ]
-    ]
 
-    prediction = int(model.predict(features)[0])
-    probabilities = model.predict_proba(features)[0]
+        prediction = int(model.predict(features)[0])
+        probabilities = model.predict_proba(features)[0]
 
-    latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
+        pred_latency_s = time.perf_counter() - start_time
+        latency_ms = round(pred_latency_s * 1000, 2)
 
-    predicted_species = str(class_names[prediction])
-    prob_dict = {
-        str(name): round(float(prob), 4)
-        for name, prob in zip(class_names, probabilities)
-    }
-    confidence = round(float(max(probabilities)), 4)
+        predicted_species = str(class_names[prediction])
+        prob_dict = {
+            str(name): round(float(prob), 4)
+            for name, prob in zip(class_names, probabilities)
+        }
+        confidence = round(float(max(probabilities)), 4)
 
-    now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(timezone.utc).isoformat()
 
-    # Save to database
-    record = save_prediction(
-        {
-            "sepal_length": flower.sepal_length,
-            "sepal_width": flower.sepal_width,
-            "petal_length": flower.petal_length,
-            "petal_width": flower.petal_width,
+        # Record custom Prometheus metrics
+        PREDICTION_REQUESTS_TOTAL.labels(species=predicted_species, status="success").inc()
+        PREDICTION_LATENCY_SECONDS.observe(pred_latency_s)
+
+        # Save to database
+        record = save_prediction(
+            {
+                "sepal_length": flower.sepal_length,
+                "sepal_width": flower.sepal_width,
+                "petal_length": flower.petal_length,
+                "petal_width": flower.petal_width,
+                "predicted_species": predicted_species,
+                "confidence": confidence,
+                "prob_setosa": prob_dict.get("setosa", 0),
+                "prob_versicolor": prob_dict.get("versicolor", 0),
+                "prob_virginica": prob_dict.get("virginica", 0),
+                "latency_ms": latency_ms,
+                "created_at": now,
+            }
+        )
+
+        return {
+            "id": record["id"],
             "predicted_species": predicted_species,
+            "probabilities": prob_dict,
             "confidence": confidence,
-            "prob_setosa": prob_dict.get("setosa", 0),
-            "prob_versicolor": prob_dict.get("versicolor", 0),
-            "prob_virginica": prob_dict.get("virginica", 0),
             "latency_ms": latency_ms,
             "created_at": now,
         }
-    )
-
-    return {
-        "id": record["id"],
-        "predicted_species": predicted_species,
-        "probabilities": prob_dict,
-        "confidence": confidence,
-        "latency_ms": latency_ms,
-        "created_at": now,
-    }
+    except Exception as e:
+        PREDICTION_REQUESTS_TOTAL.labels(species="unknown", status="error").inc()
+        PREDICTION_ERRORS_TOTAL.labels(error_type=type(e).__name__).inc()
+        raise
 
 
 # ─── Prediction History ─────────────────────────────────────────────────────────
