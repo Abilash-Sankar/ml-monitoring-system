@@ -48,3 +48,52 @@ export async function predictSpecies(input) {
   }
   return response.json();
 }
+
+/**
+ * Fetch aggregated prediction statistics from the backend database.
+ * @returns {Promise<{total_predictions: number, species_distribution: Record<string, number>, avg_confidence: number, avg_latency_ms: number|null, recent_predictions: Array}>}
+ */
+export async function fetchPredictionStats() {
+  const response = await fetch(`${API_BASE_URL}/predictions/stats`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch prediction stats: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetch paginated prediction history from the backend.
+ * @param {{page?: number, per_page?: number, species?: string}} params
+ * @returns {Promise<{predictions: Array, total: number, page: number, per_page: number, total_pages: number}>}
+ */
+export async function fetchPredictions(params = {}) {
+  const searchParams = new URLSearchParams();
+  if (params.page) searchParams.set('page', params.page);
+  if (params.per_page) searchParams.set('per_page', params.per_page);
+  if (params.species) searchParams.set('species', params.species);
+  const qs = searchParams.toString();
+  const url = `${API_BASE_URL}/predictions${qs ? `?${qs}` : ''}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch predictions: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetch raw Prometheus metrics text from the backend /metrics endpoint.
+ * @returns {Promise<string>} Prometheus exposition format text
+ */
+export async function fetchRawMetrics() {
+  const response = await fetch(`${API_BASE_URL}/metrics`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch metrics: ${response.status} ${response.statusText}`);
+  }
+  return response.text();
+}
